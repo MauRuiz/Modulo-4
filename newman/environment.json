@@ -1,0 +1,7 @@
+{
+  "name": "JSONPlaceholder",
+  "values": [
+    { "key": "baseUrl", "value": "https://jsonplaceholder.typicode.com", "enabled": true },
+    { "key": "postIdCreado", "value": "", "enabled": true }
+  ]
+}

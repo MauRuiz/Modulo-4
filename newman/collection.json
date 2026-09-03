@@ -1,0 +1,155 @@
+{
+  "info": {
+    "name": "JSONPlaceholder - API Tests (equivalente a ApiClient.ts)",
+    "description": "Misma cobertura que tests/07-api-testing.spec.ts del laboratorio playwright-lab-saucedemo, reescrita para Postman/Newman.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://jsonplaceholder.typicode.com" }
+  ],
+  "item": [
+    {
+      "name": "01 - Fundamentos",
+      "item": [
+        {
+          "name": "GET Usuario existente",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/users/1", "host": ["{{baseUrl}}"], "path": ["users", "1"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code es 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('El body tiene la propiedad name', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('name');",
+                  "});",
+                  "",
+                  "pm.test('El id coincide con el solicitado', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.id).to.eql(1);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Usuario inexistente devuelve 404",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/users/99999", "host": ["{{baseUrl}}"], "path": ["users", "99999"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code es 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Crear post",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Mi primer post de prueba\",\n  \"body\": \"Contenido de prueba generado desde Newman\",\n  \"userId\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/posts", "host": ["{{baseUrl}}"], "path": ["posts"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code es 201 (Created)', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('El post creado conserva el title enviado', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.title).to.eql('Mi primer post de prueba');",
+                  "});",
+                  "",
+                  "pm.test('La API asigna un id nuevo', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('id');",
+                  "    pm.collectionVariables.set('postIdCreado', body.id);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE Eliminar post",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/posts/1", "host": ["{{baseUrl}}"], "path": ["posts", "1"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code está en el rango 2xx', function () {",
+                  "    pm.response.to.be.success;",
+                  "    pm.expect(pm.response.code).to.be.within(200, 299);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 - Data Driven (equivalente al for...of de Playwright)",
+      "item": [
+        {
+          "name": "GET Usuario (parametrizado por data file)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/users/{{id}}", "host": ["{{baseUrl}}"], "path": ["users", "{{id}}"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('El id de la respuesta coincide con el del data file', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(String(body.id)).to.eql(String(pm.iterationData.get('id')));",
+                  "});",
+                  "",
+                  "pm.test('El username no viene vacío', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.username).to.not.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
